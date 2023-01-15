@@ -1,0 +1,60 @@
+﻿@model IEnumerable<CourseRegistration.Models.Student>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+
+
+<h1 style="margin: 50px 0px 50px 0px; text-shadow: 2px 2px 10px lightblue">@Model.Count() @localizer["Amount of expressions of interest received"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @*@Html.DisplayNameFor(model => model.FirstName)*@
+                @localizer["FirstName"]
+            </th>
+            <th>
+                @*@Html.DisplayNameFor(model => model.LastName)*@
+                @localizer["LastName"]
+            </th>
+            <th>
+                @*@Html.DisplayNameFor(model => model.City)*@
+                @localizer["City"]
+            </th>
+            <th>
+                @*@Html.DisplayNameFor(model => model.Phone)*@
+                @localizer["Phone"]
+            </th>
+            <th>
+                @*@Html.DisplayNameFor(model => model.Email)*@
+                @localizer["Email"]
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.City)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                  
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary">@localizer["btnDetails"]</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@localizer["btnEdit"]</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@localizer["btnDelete"]</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

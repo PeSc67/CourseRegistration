@@ -1,0 +1,48 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Builder.RequestLocalizationOptions> locOptions
+
+
+@{
+    var culture = Context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>();
+    var cultureList = locOptions.Value.SupportedUICultures.Select(x => new SelectListItem { Value = x.Name, Text = localizer.GetString(x.Name) }).ToList();
+    var returnUrl = string.IsNullOrWhiteSpace(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}{Context.Request.QueryString}";
+}
+
+
+<ul class="navbar-nav" style="margin-left: 30px">
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="sv-SE" asp-route-returnUrl="@returnUrl">
+            <img src="~/images/icons-culture/sverige.png" width="30" margin="5" />
+        </a>
+    </li>
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="fi-FI" asp-route-returnUrl="@returnUrl">
+            <img src="~/images/icons-culture/finland.png" width="30" margin="5" />
+        </a>
+    </li>
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="en-US" asp-route-returnUrl="@returnUrl">
+            <img src="~/Images/icons-culture/england.png" width="30" margin="5" />
+        </a>
+    </li>
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="de-DE" asp-route-returnUrl="@returnUrl">
+            <img src="~/images/icons-culture/tyskland.png" width="30" margin="5" />
+        </a>
+    </li>
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="fr-FR" asp-route-returnUrl="@returnUrl">
+            <img src="~/images/icons-culture/frankrike.png" width="30" margin="5" />
+        </a>
+    </li>
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="es-ES" asp-route-returnUrl="@returnUrl">
+            <img src="~/images/icons-culture/spanien.png" width="30" margin="5" />
+        </a>
+    </li>
+    <li class="nav-item">
+        <a asp-controller="Language" asp-action="ChangeCultureByIcon" asp-route-culture="it-IT" asp-route-returnUrl="@returnUrl">
+            <img src="~/images/icons-culture/italien.png" width="30" margin="5" />
+        </a>
+    </li>
+</ul>
