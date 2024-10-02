@@ -19,7 +19,7 @@ namespace CourseRegistration.Controllers
 
         public IActionResult Index()
         {
-            ViewData["Welcome"] = _localizer["WelcomeToLexicon"];
+            //ViewData["Welcome"] = _localizer["WelcomeToLexicon"];
             return View();
         }
 

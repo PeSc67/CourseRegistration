@@ -121,7 +121,7 @@
     <value>Accesso</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Logga ut</value>
+    <value>Esci</value>
   </data>
   <data name="Register" xml:space="preserve">
     <value>Registro</value>
