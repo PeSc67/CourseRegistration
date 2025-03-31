@@ -1,9 +1,148 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 
+<style>
+    .flex-container {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .flex-container > div {
+            background-color: #ffffff;
+            width: 510px;
+            margin: 10px;
+            text-align: center;
+            border: 1px solid gray;
+            border-radius: 20px;
+            box-shadow: 15px 15px 10px lightgray;
+    }
+</style>
+
+
 
 
 <div class="text-center">
-    <h1 style="margin: 50px 0px 20px 0px; text-shadow: 2px 2px 10px lightblue" class="display-4">@localizer["Welcome"]</h1>
-@*    <h1 style="margin: 50px 0px 20px 0px; text-shadow: 2px 2px 10px lightblue" class="display-4">@ViewData["Welcome"]</h1>
-*@
+    <h1 style="margin: 50px 0px 0px 0px; text-shadow: 2px 2px 10px lightblue" class="display-4">@localizer["Welcome"]</h1>
+    <p>
+        Vill du utbilda dig till systemutvecklare inom webbdesign?<br />
+        Vi har flera utbildningar att välja mellan i Linköping!
+    </p>
 </div>
+
+<br />
+
+<div class="m-4 p-5" style="border:1px solid gray; border-radius: 20px; box-shadow: 15px 15px 10px lightgray; background-color: white">
+    <h2>Kommande informationsträffar:</h2>
+    Måndag 7 April, kl 13.00-15.00<br />
+    Måndag 28 Aril, kl 13.00-15.00<br />
+    <br />
+    <p><i>Man måste vara inskriven på AF och ha deltagit på en av våra informationsträff innan man kan anmäla sig till kurs. Det går att deltaga på denna träff digitalt. Informationsträffarna tar upp om båda våra utbildningar.</i></p>
+    <br />
+
+    <h2>Nästa kursstart:</h2>
+    Tisdag 22/4 (Systemutveckling: TypeScript/React/NextJS)<br />
+    Tisdag 27/5 (Systemutveckling: C#/ASP.NET Core)
+</div>
+
+
+<div class="flex-container mt-5">
+
+
+    <div>
+        <br />
+        Utbildning 1<br /><br />
+        <h2>C#/ASP.NET Core</h2>
+        <br />
+
+
+        <div class="mx-4">
+
+            <u><b>Innehåll:</b></u><br />
+
+            <i>
+                C#<br />
+                C# OOP<br />
+                HTML<br />
+                CSS<br />
+                Bootstrap<br />
+                JavaScript<br />
+                jQuery<br />
+                MS-SQL<br />
+                ASP.NET Core<br />
+                MVC<br />
+                LINQ<br />
+                Entity Framework<br />
+                GitHub<br />
+                Scrum<br />
+                Azure<br />
+                API<br />
+                AI<br />
+            </i>
+            <br /><br />
+
+
+
+            <u><b>2st grupparbeten:</b></u><br />
+
+            <i>
+                Webshop för filmer<br />
+                Nyhetssite<br />
+            </i>
+            <br /><br />
+
+        </div>
+    </div>
+
+    <div>
+        <br />
+        Utbildning 2<br /><br />
+        <h2>TypeScript/React/NextJS</h2>
+        <br />
+
+
+        <div class="mx-4">
+            <u><b>Innehåll:</b></u><br />
+
+            <i>
+                Node.js<br />
+                JavaScript<br />
+                HTML<br />
+                CSS<br />
+                PostgreSQL<br />
+                TypeScript<br />
+                Prisma<br />
+                React<br />
+                Next.js<br />
+                Tailwindcss<br />
+                Shadcn/UI<br />
+                Zod<br />
+                Better-Auth<br />
+                Git/GitHub<br />
+                Scrum<br />
+                API<br />
+                AI<br />
+            </i>
+            <br /><br />
+
+            <u><b>2st grupparbeten:</b></u><br />
+
+            <i>
+                Webshop för filmer<br />
+                Nyhetssite<br />
+            </i>
+            <br /><br />
+
+
+        </div>
+    </div>
+
+</div>
+
+<br />
+
+<div class="m-4 p-5" style="border:1px solid gray; border-radius: 20px; box-shadow: 15px 15px 10px lightgray; background-color: white">
+    <h2>Nyhet!!! Python-utbildning i höst!</h2>
+    <p>Vi planerar just nu för en helt ny utbildning, också inriktad mot webdesign, men med Python som grundspråk inom Backendste vara inskriven på AF och ha deltagit på en av våra informationsträff innan man kan anmäla sig till kurs. Det går att deltaga på denna träff digitalt.</p>
+</div>
+
+
+
