@@ -1,0 +1,18 @@
+﻿@model CourseRegistration.ViewModels.FileSentWithEmailVM
+
+
+<h2 class="mt-5">File is sent to @Model.DestinationEmail!</h2>
+
+@if (Model.FileSavedInSystem)
+{
+    <p>
+        <span>
+            The file is also saved at the server!<br />
+            Name of file: @Model.FileName
+        </span>
+    </p>
+}
+
+<a class="btn btn-dark mx-2 mt-4" asp-controller="Student" asp-action="Index" asp-route-orderBy="@Model.OrderBy">Go back to the list!</a>
+
+
