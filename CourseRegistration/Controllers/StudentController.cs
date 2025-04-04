@@ -10,43 +10,64 @@ using CourseRegistration.Models;
 //using ClosedXML.Excel;
 //using DocumentFormat.OpenXml.Spreadsheet;
 using System.Linq.Expressions;
+using Microsoft.Data.SqlClient;
+using System.Text;
+using System.IO;
+using CourseRegistration.Services;
+using System.Configuration;
+using CourseRegistration.ViewModels;
+
+
 
 namespace CourseRegistration.Controllers
 {
     public class StudentController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _webHostEnvirement;
+        private readonly IStudentService _studentService;
 
-        public StudentController(ApplicationDbContext context)
+        public StudentController(IConfiguration configuration, IWebHostEnvironment webHostEnvirement, IStudentService studentService)
         {
-            _context = context;
+            _configuration = configuration;
+            _webHostEnvirement = webHostEnvirement;
+            _studentService = studentService;
+        }
+
+
+
+        public IActionResult Index(string orderBy = "Id")  // orderby = "FirstName", "LastName" eller "City"
+        {
+            var students = _studentService.GetStudents().AsQueryable();
+
+            Func<Student, dynamic> orderByFn = orderBy switch
+            {
+                "FirstName" => (Student student) => student.FirstName,
+                "LastName" => (Student student) => student.LastName,
+                "City" => (Student student) => student.City,
+                _ => (Student student) => student.Id
+            };
+
+            var orderedStudents = students.OrderBy(orderByFn).ToList();
+
+            StudentIndexVM vm = new StudentIndexVM()
+            {
+                Students = orderedStudents,
+                OrderBy = orderBy
+            };
+
+            return View(vm);
         }
 
 
 
 
-        public async Task<IActionResult> Index()
+        public IActionResult Details(int? id)
         {
-            return View(await _context.Students.OrderByDescending(s => s.Id).ToListAsync());
-        }
+            var objList = _studentService.GetStudents();
+            var obj = objList.FirstOrDefault(m => m.Id == id);
 
-
-
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Students == null)
-            {
-                return NotFound();
-            }
-
-            var student = await _context.Students
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (student == null)
-            {
-                return NotFound();
-            }
-
-            return View(student);
+            return View(obj);
         }
 
 
@@ -60,34 +81,24 @@ namespace CourseRegistration.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,City,Phone,Email,Note")] Student student)
+        public IActionResult Create(Student obj)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(student);
-                await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
+                _studentService.SaveStudent(obj);
                 return View("ThankYou");
             }
-            return View(student);
+            return View(obj);
         }
 
 
 
 
 
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int id)
         {
-            if (id == null || _context.Students == null)
-            {
-                return NotFound();
-            }
+            var student = _studentService.GetStudentById(id);
 
-            var student = await _context.Students.FindAsync(id);
-            if (student == null)
-            {
-                return NotFound();
-            }
             return View(student);
         }
 
@@ -95,97 +106,181 @@ namespace CourseRegistration.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,City,Phone,Email,Note")] Student student)
+        public ActionResult Edit(Student obj)
         {
-            if (id != student.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(student);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!StudentExists(student.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _studentService.EditStudent(obj);
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(student);
+
+            return View(obj);
         }
 
 
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int id)
         {
-            if (id == null || _context.Students == null)
-            {
-                return NotFound();
-            }
+            Student obj = _studentService.GetStudentById(id);
 
-            var student = await _context.Students
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (student == null)
-            {
-                return NotFound();
-            }
-
-            return View(student);
+            return View(obj);
         }
 
 
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            if (_context.Students == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Students'  is null.");
-            }
-            var student = await _context.Students.FindAsync(id);
-            if (student != null)
-            {
-                _context.Students.Remove(student);
-            }
+            _studentService.DeleteStudent(id);
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
+
         private bool StudentExists(int id)
         {
-            return _context.Students.Any(e => e.Id == id);
+            return _studentService.StudentExist(id);
         }
 
 
-        //public void IActionResult ExportDatabaseToFile(string databaseName)
-        //{
-        //    try
-        //    {
-        //        using XLWorkbook workbook = new()
-        //        {
-        //             workbook.Worksheets.Add(this.appData.Students.Copy.ToDataTable(), "Students");
-        //             woorkbook.SaveAs(sdf.FileName);
-        //             ViewBag.Message = "You have sucessfully exported your data to an excel file!";
-        //         }
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        ViewBag.Message = "Something goes wrong or missing!!!";
 
+
+        public ActionResult SendFileToEmailAddress(string orderBy, bool saveFile, string fileFormat, string destinationEmail)
+        {
+            StringBuilder csvData = new StringBuilder();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            string query = "SELECT * FROM Students";
+            
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                // Write column headers
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    csvData.Append(reader.GetName(i) + ",");
+                }
+                csvData.AppendLine();
+
+                // Write rows
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        csvData.Append(reader[i].ToString() + ",");
+                    }
+                    csvData.AppendLine();
+                }
+            }
+
+            string uploadsFolder = Path.Combine(_webHostEnvirement.WebRootPath, "ExportedStudentLists");
+
+            // Ensure the directory exists
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+
+            string todaysDateTime = (DateTime.Now).ToString();
+            todaysDateTime = todaysDateTime.Replace(":", "-").Replace(" ", "_");
+
+            string fileName = string.Empty;
+
+            if (fileFormat == "CSV")
+            {
+                fileName = todaysDateTime + ".csv";
+                string filePath = Path.Combine(uploadsFolder, fileName);
+                System.IO.File.WriteAllText(filePath, csvData.ToString());
+
+
+                if (!saveFile)  // Delete file from folder
+                {
+                    DeleteFileFromDisk(fileName);
+                }
+            }
+
+            FileSentWithEmailVM vm = new FileSentWithEmailVM()
+            {
+                FileFormat = fileFormat,
+                FileName = fileName,
+                FileSavedInSystem = saveFile,
+                DestinationEmail = destinationEmail,
+                OrderBy = orderBy,
+            };
+
+            return View("FileSentWithEmail", vm);
+        }
+
+
+        //private ActionResult SendFileToEmailAddress(string orderBy)
+        //{
+        //    StringBuilder csvData = new StringBuilder();
+        //    var connectionString = _configuration.GetConnectionString("DefaultConnection");
+        //    string query = "SELECT * FROM Students";
+
+        //    using (SqlConnection connection = new SqlConnection(connectionString))
+        //    {
+        //        SqlCommand command = new SqlCommand(query, connection);
+        //        connection.Open();
+        //        SqlDataReader reader = command.ExecuteReader();
+
+        //        // Write column headers
+        //        for (int i = 0; i < reader.FieldCount; i++)
+        //        {
+        //            csvData.Append(reader.GetName(i) + ",");
+        //        }
+        //        csvData.AppendLine();
+
+        //        // Write rows
+        //        while (reader.Read())
+        //        {
+        //            for (int i = 0; i < reader.FieldCount; i++)
+        //            {
+        //                csvData.Append(reader[i].ToString() + ",");
+        //            }
+        //            csvData.AppendLine();
+        //        }
         //    }
+
+        //    string uploadsFolder = Path.Combine(_webHostEnvirement.WebRootPath, "ExportedStudentLists");
+
+        //    // Ensure the directory exists
+        //    if (!Directory.Exists(uploadsFolder))
+        //    {
+        //        Directory.CreateDirectory(uploadsFolder);
+        //    }
+
+        //    string todaysDateTime = (DateTime.Now).ToString();
+        //    todaysDateTime = todaysDateTime.Replace(":", "-").Replace(" ", "_");
+
+        //    string fileName = todaysDateTime + ".csv";
+
+        //    string filePath = Path.Combine(uploadsFolder, fileName);
+
+        //    System.IO.File.WriteAllText(filePath, csvData.ToString());
+
+        //    return View("FileSaved");
         //}
+
+
+        private void DeleteFileFromDisk(string fileUrl)
+        {
+            string fileNameFullPath = Path.Combine(_webHostEnvirement.WebRootPath, "ExportedStudentLists", fileUrl);
+
+            if (fileNameFullPath != null || fileNameFullPath != string.Empty)
+            {
+                if ((System.IO.File.Exists(fileNameFullPath)))
+                {
+                    System.IO.File.Delete(fileNameFullPath);
+                }
+            }
+        }
+
+
     }
 }
 

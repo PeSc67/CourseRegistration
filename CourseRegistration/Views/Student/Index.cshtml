@@ -1,60 +1,102 @@
-﻿@model IEnumerable<CourseRegistration.Models.Student>
+﻿@model CourseRegistration.ViewModels.StudentIndexVM
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 
 
-<h1 style="margin: 50px 0px 50px 0px; text-shadow: 2px 2px 10px lightblue">@Model.Count() @localizer["Amount of expressions of interest received"]</h1>
+<h1 style="margin: 50px 0px 50px 0px; text-shadow: 2px 2px 10px lightblue">@Model.Students.Count() @localizer["Amount of expressions of interest received"]</h1>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @*@Html.DisplayNameFor(model => model.FirstName)*@
-                @localizer["FirstName"]
+                <a asp-action="Index" asp-controller="Student" asp-route-orderBy="FirstName" style="color: black; text-decoration: none">
+                    @localizer["FirstName"]
+                </a>
+                @if (Model.OrderBy == "FirstName")
+                {
+                    <span><i class="fa-solid fa-sort-down"></i></span>
+                }
             </th>
             <th>
-                @*@Html.DisplayNameFor(model => model.LastName)*@
-                @localizer["LastName"]
+                <a asp-action="Index" asp-controller="Student" asp-route-orderBy="LastName" style="color: black; text-decoration: none">
+                    @localizer["LastName"]
+                </a>
+                @if (Model.OrderBy == "LastName")
+                {
+                    <span><i class="fa-solid fa-sort-down"></i></span>
+                }
             </th>
             <th>
-                @*@Html.DisplayNameFor(model => model.City)*@
-                @localizer["City"]
+                <a asp-action="Index" asp-controller="Student" asp-route-orderBy="City" style="color: black; text-decoration: none">
+                    @localizer["City"]
+                </a>
+                @if (Model.OrderBy == "City")
+                {
+                    <span><i class="fa-solid fa-sort-down"></i></span>
+                }
             </th>
             <th>
-                @*@Html.DisplayNameFor(model => model.Phone)*@
                 @localizer["Phone"]
             </th>
             <th>
-                @*@Html.DisplayNameFor(model => model.Email)*@
                 @localizer["Email"]
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.City)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                  
+        @foreach (var item in Model.Students)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.City)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary">@localizer["btnDetails"]</a>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">@localizer["btnEdit"]</a>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">@localizer["btnDelete"]</a>
-            </td>
-        </tr>
-}
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<hr class="my-3" />
+
+<div class="m-4">
+    <form asp-action="SendFileToEmailAddress" asp-controller="Student" asp-route-orderBy="@Model.OrderBy" asp-route-saveFile="saveFile" asp-route-fileFormat="fileFormat" asp-route-destinationEmail="destinationEmail">
+       
+        <div class="my-3">
+            <input type="radio" id="fileFormatXLSX" name="fileFormat" value="XLSX" disabled />
+            <label class="me-3">XLSX</label>
+            <input type="radio" id="fileFormatCSV" name="fileFormat" value="CSV" checked />
+            <label class="me-3">CSV</label>
+            <input type="radio" id="fileFormatPDF" name="fileFormat" value="PDF" disabled />
+            <label class="me-3">PDF</label>
+        </div>
+
+        <div class="my-3">
+            <input type="checkbox" id="saveFile" name="saveFile" value="True" checked />
+            <label>Save file on server</label>
+        </div>
+        
+        <div class="my-3">
+            <input type="email" name="destinationEmail" value="" placeholder="Destination email address" />
+            <button class="ms-2">Send mail including file</button>
+
+        </div>
+
+    </form>
+</div>

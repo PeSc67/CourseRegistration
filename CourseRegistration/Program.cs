@@ -1,4 +1,6 @@
 using CourseRegistration.Data;
+using CourseRegistration.Services;
+using DanceManagementSystem.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -12,14 +14,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services
     .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services
     .AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services
-    .AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+    .AddRoles<IdentityRole>()          /* Added for roles */
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services
@@ -53,10 +64,11 @@ builder.Services
         opt.SupportedUICultures = supportedCultures;
     });
 
+builder.Services.AddScoped<IStudentService, StudentService>();
+
 var app = builder.Build();
 
-
-
+await SeedUserAndRoles.Seed(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
