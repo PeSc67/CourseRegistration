@@ -79,24 +79,46 @@
     <form asp-action="SendFileToEmailAddress" asp-controller="Student" asp-route-orderBy="@Model.OrderBy" asp-route-saveFile="saveFile" asp-route-fileFormat="fileFormat" asp-route-destinationEmail="destinationEmail">
        
         <div class="my-3">
-            <input type="radio" id="fileFormatXLSX" name="fileFormat" value="XLSX" disabled />
+            <input id="fileFormatXLSX" type="radio" name="fileFormat" value="XLSX" disabled />
             <label class="me-3">XLSX</label>
-            <input type="radio" id="fileFormatCSV" name="fileFormat" value="CSV" checked />
+            <input id="fileFormatCSV" type="radio" name="fileFormat" value="CSV" checked />
             <label class="me-3">CSV</label>
-            <input type="radio" id="fileFormatPDF" name="fileFormat" value="PDF" disabled />
+            <input id="fileFormatPDF" type="radio" name="fileFormat" value="PDF" disabled />
             <label class="me-3">PDF</label>
         </div>
 
         <div class="my-3">
-            <input type="checkbox" id="saveFile" name="saveFile" value="True" checked />
+            <input id="saveFile" type="checkbox" name="saveFile" value="True" checked />
             <label>Save file on server</label>
         </div>
         
         <div class="my-3">
-            <input type="email" name="destinationEmail" value="" placeholder="Destination email address" />
-            <button class="ms-2">Send mail including file</button>
-
+            <input id="destinationEmail" type="email" name="destinationEmail" value="" placeholder="Destination email address" />
+            <button id="buttonSendEmail" class="ms-2">Send mail including file</button>
         </div>
 
     </form>
 </div>
+
+
+
+@section Scripts{
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+
+            $('#destinationEmail').change(function (ev) {
+                $('#buttonSendEmail').;     // add something
+            });
+
+
+
+
+        }
+    </script>
+}
+
