@@ -69,6 +69,7 @@ builder.Services.AddScoped<IStudentService, StudentService>();
 var app = builder.Build();
 
 await SeedUserAndRoles.Seed(app);
+await TemporarySeedPrivateUsersForPeder.Seed(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

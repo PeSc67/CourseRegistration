@@ -149,32 +149,59 @@ namespace CourseRegistration.Controllers
         public ActionResult SendFileToEmailAddress(string orderBy, bool saveFile, string fileFormat, string destinationEmail)
         {
             StringBuilder csvData = new StringBuilder();
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            string query = "SELECT * FROM Students";
-            
-            using (SqlConnection connection = new SqlConnection(connectionString))
+
+            // Hämta data via service (EF)
+            var studentList = _studentService.GetStudents().ToList();
+
+            // Headers
+            csvData.AppendLine("\"FirstName\";\"LastName\";\"City\";\"Email\";\"Phone\";\"InfoNotes\"");
+
+            // Rows
+            foreach (var s in studentList)
             {
-                SqlCommand command = new SqlCommand(query, connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                // Write column headers
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    csvData.Append(reader.GetName(i) + ",");
-                }
-                csvData.AppendLine();
-
-                // Write rows
-                while (reader.Read())
-                {
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        csvData.Append(reader[i].ToString() + ",");
-                    }
-                    csvData.AppendLine();
-                }
+             
+                string phoneNumber = s.Phone?.Replace(" ", "");
+                csvData.AppendLine($"\"{s.FirstName}\";\"{s.LastName}\";\"{s.City}\";\"{s.Email}\";\"{phoneNumber}\";\"Info: {s.Note}\"");
             }
+
+
+            //var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            //string query = "SELECT * FROM Students";
+            
+            //using (SqlConnection connection = new SqlConnection(connectionString))
+            //{
+            //    SqlCommand command = new SqlCommand(query, connection);
+            //    connection.Open();
+            //    SqlDataReader reader = command.ExecuteReader();
+
+                //// Write column headers
+                //for (int i = 0; i < reader.FieldCount; i++)
+                //{
+                //    csvData.Append(reader.GetName(i) + ",");
+                //}
+                //csvData.AppendLine();
+
+                //// Write rows
+                //for (int p = 1; p < reader. ;p++)
+                //{
+                //    for (int i = 0; i < reader.FieldCount; i++)
+                //    {
+                //        csvData.Append(reader[i].ToString() + ",");
+                //    }
+                //    csvData.AppendLine();
+                //}
+
+                //// Write rows
+                //while (reader.Read())
+                //{
+                //    for (int i = 0; i < reader.FieldCount; i++)
+                //    {
+                //        csvData.Append(reader[i].ToString() + ",");
+                //    }
+                //    csvData.AppendLine();
+                //}
+
+            //}
 
             string uploadsFolder = Path.Combine(_webHostEnvirement.WebRootPath, "ExportedStudentLists");
 
@@ -192,12 +219,22 @@ namespace CourseRegistration.Controllers
 
             if (fileFormat == "CSV")
             {
+                // för att ändra encoding från UTF8 till UT8 BOM, så att Excell kan importera åäö på rätt sätt
+                var utf8WithBom = new UTF8Encoding(true);
+
+
+                // Uppbyggnad av fil, sökväg och spara på disk
                 fileName = todaysDateTime + ".csv";
                 string filePath = Path.Combine(uploadsFolder, fileName);
-                System.IO.File.WriteAllText(filePath, csvData.ToString());
+                System.IO.File.WriteAllText(filePath, csvData.ToString(), utf8WithBom);
 
 
-                if (!saveFile)  // Delete file from folder
+                // LOGIK FÖR ATT MAILA FILEN TILL JOHAN MELANDER
+                // SendMail-funktion med Google hidden SMTP-tjänst
+
+
+                // Kolla om filen ska sparas i mappen eller inte efter att den skickats med mail.
+                if (!saveFile)  
                 {
                     DeleteFileFromDisk(fileName);
                 }

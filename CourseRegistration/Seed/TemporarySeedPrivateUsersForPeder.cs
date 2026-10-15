@@ -31,7 +31,7 @@ namespace DanceManagementSystem.Seed
                         new IdentityUser { UserName = "Peder_User", Email = "Peder_User@test.com", PhoneNumber = "073-962 83 59"},
                 };
 
-                var password = "password";
+                var password = "*Password67";
 
                 foreach (var usr in pedersUsers)
                 {
